@@ -18,11 +18,11 @@ class FileScanner:
         }
         self.scan_result = None
         self.quarantine_dir = "quarantine"
-        
+
         # Tạo thư mục cách ly nếu chưa tồn tại
         if not os.path.exists(self.quarantine_dir):
             os.makedirs(self.quarantine_dir)
-        
+
     def setup_logging(self):
         logging.basicConfig(
             filename='scan_log.txt',
@@ -41,6 +41,19 @@ class FileScanner:
             return True
         except Exception as e:
             self.logger.error(f"Error quarantining file {filepath}: {str(e)}")
+            return False
+
+    def delete_quarantined_files(self):
+        """Xóa tất cả các file trong khu vực cách ly"""
+        try:
+            files = os.listdir(self.quarantine_dir)
+            for file in files:
+                file_path = os.path.join(self.quarantine_dir, file)
+                os.remove(file_path)
+                self.logger.info(f"Deleted quarantined file: {file_path}")
+            return True
+        except Exception as e:
+            self.logger.error(f"Error deleting quarantined files: {str(e)}")
             return False
 
     def scan_file(self, filepath, progress_callback=None):
@@ -112,16 +125,16 @@ def sprogress():
     if not sfile:
         flbl.config(text="Please select a file first!")
         return
-    
+
     bar.place(x=120, y=450)
     slb.place(x=200, y=480)
     bar['value'] = 0
-    
+
     # Quét file
     result = scanner.scan_file(sfile)
     last_scan_result = result
     last_scanned_file = sfile
-    
+
     for i in range(1, 101):
         time.sleep(0.05)  
         bar['value'] = i
@@ -135,7 +148,7 @@ def sprogress():
             slb.config(text=f"Finalizing... {i}%")
             
         vx.update_idletasks()
-    
+
     # Hiển thị kết quả cuối cùng
     if result['is_malicious']:
         slb.config(text="UNSAFE FILE", fg='red', font='Gothic 15 bold')
@@ -157,7 +170,7 @@ def show_quarantine():
     quarantine_window.title("Quarantine Management")
     quarantine_window.geometry("400x300")
     quarantine_window.config(background='black')
-    
+
     # Hiển thị danh sách file trong thư mục cách ly
     files = os.listdir(scanner.quarantine_dir)
     if files:
@@ -182,11 +195,18 @@ def quarantine_current_file():
     else:
         messagebox.showerror("Error", "Failed to quarantine file!")
 
+def delete_quarantined():
+    """Hàm xử lý việc xóa các file bị cách ly"""
+    if scanner.delete_quarantined_files():
+        messagebox.showinfo("Success", "All quarantined files have been deleted!")
+    else:
+        messagebox.showerror("Error", "Failed to delete quarantined files!")
+
 # Mở ứng dụng
 vx = Tk()
 vx.title("VERMOUTHSECUREX")
 vx.geometry("540x620+480+100")
-vx.iconbitmap("E:\\CLB\\GDSC\\vmsx.ico")
+vx.iconbitmap("C:\\Users\\admin\\OneDrive\\Máy tính\\vermouth\\Vermouth-Project\\vmsx.ico")
 vx.config(background='black')
 vx.resizable(False, False)
 
@@ -194,7 +214,7 @@ vx.resizable(False, False)
 sfile = None
 
 # Hình nền
-bg = PhotoImage(file="E:\\CLB\\GDSC\\bg600.png")
+bg = PhotoImage(file="C:\\Users\\admin\\OneDrive\\Máy tính\\vermouth\\Vermouth-Project\\bg600.png")
 canvas1 = Canvas(vx, width=400, height=400)
 canvas1.pack(fill="both", expand=True)
 canvas1.create_image(0, 0, image=bg, anchor="nw")
@@ -236,10 +256,6 @@ def select_file():
 # Chạy trên luồng mới
 def sthread():
     threading.Thread(target=sprogress).start()  
-    
-# Hàm Antivirus
-def antivirus():
-    pass
 
 # Hàm Exit
 def exit():
@@ -247,15 +263,15 @@ def exit():
 
 # Buttons
 b0 = Button(vx, text="Select File", font='Gothic 20 bold', bg='black', fg='white', bd=5, command=select_file)
-b1 = Button(vx, text="Start Cheking", font='Gothic 20 bold', bg='black', fg='white', bd=5, command=sthread)
-b2 = Button(vx, text="Antivirus", font='Gothic 20 bold', bg='black', fg='white', bd=5, command=antivirus)
+b1 = Button(vx, text="Start Checking", font='Gothic 20 bold', bg='black', fg='white', bd=5, command=sthread)
+b2 = Button(vx, text="Delete Quarantine", font='Gothic 20 bold', bg='black', fg='white', bd=5, command=delete_quarantined)
 b3 = Button(vx, text="Quarantine", font='Gothic 20 bold', bg='black', fg='white', bd=5, command=quarantine_current_file)
 b4 = Button(vx, text="Exit", font='Gothic 20 bold', bg='black', fg='white', bd=5, command=exit)
 
 # Hiển thị các button
 canvas1.create_window(180, 100, anchor="nw", window=b0)  # Nút Select File
 canvas1.create_window(165, 180, anchor="nw", window=b1)  # Nút Start Checking
-canvas1.create_window(195, 260, anchor="nw", window=b2)  # Nút Antivirus
+canvas1.create_window(195, 260, anchor="nw", window=b2)  # Nút Delete Quarantine
 canvas1.create_window(190, 340, anchor="nw", window=b3)  # Nút Quarantine
 canvas1.create_window(235, 420, anchor="nw", window=b4)  # Nút Exit
 
