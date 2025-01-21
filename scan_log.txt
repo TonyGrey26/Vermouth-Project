@@ -5,23 +5,5 @@
 2025-01-21 11:25:59,222 - INFO - Hash: c22ce7cb761046e45edb2f531e92dae054f131da
 2025-01-21 11:25:59,222 - INFO - Result: File appears to be safe
 2025-01-21 14:06:28,817 - INFO - Deleted quarantined file: quarantine\New Text Document.txt
-2025-01-21 17:18:32,114 - ERROR - Error scanning file C:/Users/admin/OneDrive/Máy tính/tét.txt: cannot connect to clamd. is the clamd server running?
-2025-01-21 17:46:04,460 - INFO - Scanned file: C:/Users/admin/OneDrive/Máy tính/tét.txt
-2025-01-21 17:46:04,460 - INFO - Hash: da39a3ee5e6b4b0d3255bfef95601890afd80709
-2025-01-21 17:46:04,460 - INFO - Result: File appears to be safe
-2025-01-21 17:49:15,349 - INFO - Scanned file: C:/Users/admin/OneDrive/Máy tính/tét.txt
-2025-01-21 17:49:15,349 - INFO - Hash: da39a3ee5e6b4b0d3255bfef95601890afd80709
-2025-01-21 17:49:15,349 - INFO - Result: File appears to be safe
-2025-01-21 17:49:55,675 - INFO - Scanned file: C:/Users/admin/OneDrive/Máy tính/tét.txt
-2025-01-21 17:49:55,675 - INFO - Hash: da39a3ee5e6b4b0d3255bfef95601890afd80709
-2025-01-21 17:49:55,675 - INFO - Result: File appears to be safe
-2025-01-21 17:51:08,532 - INFO - Scanned file: C:/Users/admin/OneDrive/Máy tính/tét.txt
-2025-01-21 17:51:08,532 - INFO - Hash: da39a3ee5e6b4b0d3255bfef95601890afd80709
-2025-01-21 17:51:08,532 - INFO - Result: File appears to be safe
-2025-01-21 18:04:24,755 - ERROR - Error scanning file C:/Users/admin/OneDrive/Máy tính/tét.txt: name 'is_malicious' is not defined
-2025-01-21 18:13:57,128 - INFO - Scanned file: C:/Users/admin/OneDrive/Máy tính/tét.txt
-2025-01-21 18:13:57,128 - INFO - Result: Unable to scan file: ClamAV scan error: Cannot connect to clamd. Is the clamd server running?
-2025-01-21 18:14:48,534 - INFO - Scanned file: C:/Users/admin/OneDrive/Máy tính/tét.txt
-2025-01-21 18:14:48,534 - INFO - Result: Unable to scan file: ClamAV scan error: Cannot connect to clamd. Is the clamd server running?
-2025-01-21 18:15:18,633 - INFO - Scanned file: C:/Users/admin/OneDrive/Máy tính/tét.txt
-2025-01-21 18:15:18,633 - INFO - Result: Unable to scan file: ClamAV scan error: Cannot connect to clamd. Is the clamd server running?
+2025-01-21 21:47:55,450 - INFO - Scanned file: C:/Users/Nghaiz/Downloads/DeathNote.exe
+2025-01-21 21:47:55,450 - INFO - Result: WARNING: Malware detected! (ClamAV Result: FOUND)

@@ -8,32 +8,7 @@ import hashlib
 import logging
 import shutil
 import socket
-
-class ClamavWrapper:
-    def __init__(self, host: str, port: int):
-        self.host = host
-        self.port = port
-
-        try:
-            self.sock = socket.create_connection((self.host, self.port))
-        except Exception as e:
-            raise ConnectionError('Cannot connect to clamd. Is the clamd server running?')
-
-    def scan_file(self, file_path: str):
-        with open(file_path, 'rb') as file:
-            file_content = file.read()
-
-        self.sock.sendall(b'zINSTREAM\0')
-
-        # Send content to ClamAV in chunks
-        chunk_size = 8192
-        for i in range(0, len(file_content), chunk_size):
-            chunk = file_content[i:i + chunk_size]
-            self.sock.sendall(len(chunk).to_bytes(4, byteorder='big') + chunk)
-
-        self.sock.sendall(b'\0\0\0\0')
-        response = self.sock.recv(1024)
-        return response.decode('utf-8')[8:]
+from clamav_wrapper import ClamavWrapper
 
 class FileScanner:
     def __init__(self):
@@ -196,7 +171,7 @@ def sprogress():
         File: {os.path.basename(sfile)}
         Type: {result['file_type']}
         Size: {result['file_size']} bytes
-        Status: {result['message']}
+        Status: {result['clamav_result']}
         """
         messagebox.showinfo("Scan Result", info_message)
 
@@ -242,7 +217,7 @@ def delete_quarantined():
 vx = Tk()
 vx.title("VERMOUTHSECUREX")
 vx.geometry("540x620+480+100")
-vx.iconbitmap("C:\\Users\\admin\\OneDrive\\Máy tính\\vermouth\\Vermouth-Project\\Vermouth-Project\\vmsx.ico")
+vx.iconbitmap("./vmsx.ico")
 vx.config(background='black')
 vx.resizable(False, False)
 
@@ -250,7 +225,7 @@ vx.resizable(False, False)
 sfile = None
 
 # Hình nền
-bg = PhotoImage(file="C:\\Users\\admin\\OneDrive\\Máy tính\\vermouth\\Vermouth-Project\\Vermouth-Project\\bg600.png")
+bg = PhotoImage(file="./bg600.png")
 canvas1 = Canvas(vx, width=400, height=400)
 canvas1.pack(fill="both", expand=True)
 canvas1.create_image(0, 0, image=bg, anchor="nw")
