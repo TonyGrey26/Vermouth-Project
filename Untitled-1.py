@@ -17,30 +17,27 @@ class ClamavWrapper:
         try:
             self.sock = socket.create_connection((self.host, self.port))
         except Exception as e:
-            raise ConnectionError('cannot connect to clamd. is the clamd server running?')
+            raise ConnectionError('Cannot connect to clamd. Is the clamd server running?')
 
     def scan_file(self, file_path: str):
-        file = open(file_path, 'rb')
-        file_content = file.read()
-        file.close()
+        with open(file_path, 'rb') as file:
+            file_content = file.read()
 
         self.sock.sendall(b'zINSTREAM\0')
 
-        # send content to clamd each chunk size
+        # Send content to ClamAV in chunks
         chunk_size = 8192
         for i in range(0, len(file_content), chunk_size):
             chunk = file_content[i:i + chunk_size]
             self.sock.sendall(len(chunk).to_bytes(4, byteorder='big') + chunk)
 
         self.sock.sendall(b'\0\0\0\0')
-
         response = self.sock.recv(1024)
         return response.decode('utf-8')[8:]
 
 class FileScanner:
     def __init__(self):
         self.setup_logging()
-        # Database mẫu của các file độc hại
         self.malware_hashes = {
             "e1112134b6dcc8bed54e0e34d8ac272795e73d74": "Malware Sample 1",
             "f2223456c7eddbfed65f1f45e9bd383896f84e85": "Malware Sample 2"
@@ -48,7 +45,7 @@ class FileScanner:
         self.scan_result = None
         self.quarantine_dir = "quarantine"
 
-        # Tạo thư mục cách ly nếu chưa tồn tại
+        # Create quarantine directory if not exists
         if not os.path.exists(self.quarantine_dir):
             os.makedirs(self.quarantine_dir)
 
@@ -61,7 +58,6 @@ class FileScanner:
         self.logger = logging.getLogger('FileScanner')
 
     def quarantine_file(self, filepath):
-        """Di chuyển file vào khu vực cách ly"""
         try:
             filename = os.path.basename(filepath)
             quarantine_path = os.path.join(self.quarantine_dir, filename)
@@ -73,7 +69,6 @@ class FileScanner:
             return False
 
     def delete_quarantined_files(self):
-        """Xóa tất cả các file trong khu vực cách ly"""
         try:
             files = os.listdir(self.quarantine_dir)
             for file in files:
@@ -86,22 +81,17 @@ class FileScanner:
             return False
 
     def scan_file(self, filepath, progress_callback=None):
-        """Quét file và trả về kết quả"""
         try:
-            result = ClamavWrapper(host='localhost', port=3310).scan_file(filepath)
-
-            # Tính hash của file
             sha1 = hashlib.sha1()
+            file_size = os.path.getsize(filepath)
             with open(filepath, 'rb') as f:
                 while chunk := f.read(8192):
                     sha1.update(chunk)
             fhash = sha1.hexdigest()
 
-            # Kiểm tra chữ ký file
             with open(filepath, 'rb') as f:
                 header = f.read(8)
 
-            # Xác định loại file
             fsign = {
                 b'MZ': 'Executable',
                 b'PK': 'ZIP Archive',
@@ -110,31 +100,48 @@ class FileScanner:
                 b'GIF8': 'GIF Image',
                 b'\xFF\xD8': 'JPEG Image'
             }
-
+            file_type = 'Unknown'
             for sig, ftype in fsign.items():
                 if header.startswith(sig):
-                    result['file_type'] = ftype
+                    file_type = ftype
                     break
-            else:
-                result['file_type'] = 'Unknown'
 
-            # Kiểm tra trong database mã độc
+            try:
+                clamav = ClamavWrapper(host='localhost', port=3310)
+                clamav_result = clamav.scan_file(filepath)
+            except ConnectionError as e:
+                clamav_result = f"ClamAV scan error: {str(e)}"
+
             if fhash in self.malware_hashes:
-                result['is_malicious'] = True
-                result['message'] = f"WARNING: Malware detected - {self.malware_hashes[fhash]}"
+                is_malicious = True
+                message = f"WARNING: Malware detected - {self.malware_hashes[fhash]}"
             else:
-                result['message'] = "File appears to be safe"
+                is_malicious = False
+                message = "File appears to be safe"
 
-            # Log kết quả
+            result = {
+                'file_type': file_type,
+                'file_size': file_size,
+                'is_malicious': is_malicious,
+                'message': message,
+                'clamav_result': clamav_result,
+            }
+
             self.logger.info(f"Scanned file: {filepath}")
             self.logger.info(f"Hash: {fhash}")
-            self.logger.info(f"Result: {result['message']}")
+            self.logger.info(f"Result: {message}")
 
             return result
 
         except Exception as e:
             self.logger.error(f"Error scanning file {filepath}: {str(e)}")
-            return {'is_malicious': False, 'message': f"Error scanning file: {str(e)}"}
+            return {
+                'is_malicious': False,
+                'message': f"Error scanning file: {str(e)}"
+            }
+
+# Đoạn giao diện giữ nguyên
+
 
 # Khởi tạo scanner
 scanner = FileScanner()
@@ -230,7 +237,7 @@ def delete_quarantined():
 vx = Tk()
 vx.title("VERMOUTHSECUREX")
 vx.geometry("540x620+480+100")
-vx.iconbitmap("E:\\CLB\\GDSC\\vmsx.ico")
+vx.iconbitmap("C:\\Users\\admin\\OneDrive\\Máy tính\\vermouth\\Vermouth-Project\\Vermouth-Project\\vmsx.ico")
 vx.config(background='black')
 vx.resizable(False, False)
 
@@ -238,7 +245,7 @@ vx.resizable(False, False)
 sfile = None
 
 # Hình nền
-bg = PhotoImage(file="E:\\CLB\\GDSC\\bg600.png")
+bg = PhotoImage(file="C:\\Users\\admin\\OneDrive\\Máy tính\\vermouth\\Vermouth-Project\\Vermouth-Project\\bg600.png")
 canvas1 = Canvas(vx, width=400, height=400)
 canvas1.pack(fill="both", expand=True)
 canvas1.create_image(0, 0, image=bg, anchor="nw")
@@ -290,14 +297,18 @@ b0 = Button(vx, text="Select File", font='Gothic 20 bold', bg='black', fg='white
 b1 = Button(vx, text="Start Checking", font='Gothic 20 bold', bg='black', fg='white', bd=5, command=sthread)
 b2 = Button(vx, text="Delete Quarantine", font='Gothic 20 bold', bg='black', fg='white', bd=5, command=delete_quarantined)
 b3 = Button(vx, text="Quarantine", font='Gothic 20 bold', bg='black', fg='white', bd=5, command=quarantine_current_file)
-b4 = Button(vx, text="Exit", font='Gothic 20 bold', bg='black', fg='white', bd=5, command=exit)
+b4 = Button(vx, text="Show Quarantine", font='Gothic 20 bold', bg='black', fg='white', bd=5, command=show_quarantine)
+b5 = Button(vx, text="Exit", font='Gothic 20 bold', bg='black', fg='white', bd=5, command=exit)
+
+
 
 # Hiển thị các button
 canvas1.create_window(180, 50, anchor="nw", window=b0)  # Nút Select File
 canvas1.create_window(165, 130, anchor="nw", window=b1)  # Nút Start Checking
 canvas1.create_window(135, 210, anchor="nw", window=b2)  # Nút Delete Quarantine
 canvas1.create_window(190, 290, anchor="nw", window=b3)  # Nút Quarantine
-canvas1.create_window(235, 370, anchor="nw", window=b4)  # Nút Exit
+canvas1.create_window(160, 450, anchor="nw", window=b4) # nút show file quarantine
+canvas1.create_window(235, 370, anchor="nw", window=b5)  # Nút Exit
 
 # Chạy ứng dụng
 vx.mainloop()
