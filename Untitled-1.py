@@ -168,6 +168,6 @@ delete_button.pack(pady=15)
 
 # Exit button
 exit_button = tb.Button(vx, text="Exit", bootstyle="secondary", command=vx.destroy, padding=20)
-exit_button.pack(pady=30)
+exit_button.pack(pady=20)
 
 vx.mainloop()
