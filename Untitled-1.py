@@ -7,6 +7,35 @@ import os
 import hashlib
 import logging
 import shutil
+import socket
+
+class ClamavWrapper:
+    def __init__(self, host: str, port: int):
+        self.host = host
+        self.port = port
+
+        try:
+            self.sock = socket.create_connection((self.host, self.port))
+        except Exception as e:
+            raise ConnectionError('cannot connect to clamd. is the clamd server running?')
+
+    def scan_file(self, file_path: str):
+        file = open(file_path, 'rb')
+        file_content = file.read()
+        file.close()
+
+        self.sock.sendall(b'zINSTREAM\0')
+
+        # send content to clamd each chunk size
+        chunk_size = 8192
+        for i in range(0, len(file_content), chunk_size):
+            chunk = file_content[i:i + chunk_size]
+            self.sock.sendall(len(chunk).to_bytes(4, byteorder='big') + chunk)
+
+        self.sock.sendall(b'\0\0\0\0')
+
+        response = self.sock.recv(1024)
+        return response.decode('utf-8')[8:]
 
 class FileScanner:
     def __init__(self):
@@ -59,12 +88,7 @@ class FileScanner:
     def scan_file(self, filepath, progress_callback=None):
         """Quét file và trả về kết quả"""
         try:
-            result = {
-                'is_malicious': False,
-                'file_type': None,
-                'file_size': os.path.getsize(filepath),
-                'message': ''
-            }
+            result = ClamavWrapper(host='localhost', port=3310).scan_file(filepath)
 
             # Tính hash của file
             sha1 = hashlib.sha1()
@@ -206,7 +230,7 @@ def delete_quarantined():
 vx = Tk()
 vx.title("VERMOUTHSECUREX")
 vx.geometry("540x620+480+100")
-vx.iconbitmap("C:\\Users\\admin\\OneDrive\\Máy tính\\vermouth\\Vermouth-Project\\vmsx.ico")
+vx.iconbitmap("E:\\CLB\\GDSC\\vmsx.ico")
 vx.config(background='black')
 vx.resizable(False, False)
 
@@ -214,7 +238,7 @@ vx.resizable(False, False)
 sfile = None
 
 # Hình nền
-bg = PhotoImage(file="C:\\Users\\admin\\OneDrive\\Máy tính\\vermouth\\Vermouth-Project\\bg600.png")
+bg = PhotoImage(file="E:\\CLB\\GDSC\\bg600.png")
 canvas1 = Canvas(vx, width=400, height=400)
 canvas1.pack(fill="both", expand=True)
 canvas1.create_image(0, 0, image=bg, anchor="nw")
@@ -269,11 +293,11 @@ b3 = Button(vx, text="Quarantine", font='Gothic 20 bold', bg='black', fg='white'
 b4 = Button(vx, text="Exit", font='Gothic 20 bold', bg='black', fg='white', bd=5, command=exit)
 
 # Hiển thị các button
-canvas1.create_window(180, 100, anchor="nw", window=b0)  # Nút Select File
-canvas1.create_window(165, 180, anchor="nw", window=b1)  # Nút Start Checking
-canvas1.create_window(195, 260, anchor="nw", window=b2)  # Nút Delete Quarantine
-canvas1.create_window(190, 340, anchor="nw", window=b3)  # Nút Quarantine
-canvas1.create_window(235, 420, anchor="nw", window=b4)  # Nút Exit
+canvas1.create_window(180, 50, anchor="nw", window=b0)  # Nút Select File
+canvas1.create_window(165, 130, anchor="nw", window=b1)  # Nút Start Checking
+canvas1.create_window(135, 210, anchor="nw", window=b2)  # Nút Delete Quarantine
+canvas1.create_window(190, 290, anchor="nw", window=b3)  # Nút Quarantine
+canvas1.create_window(235, 370, anchor="nw", window=b4)  # Nút Exit
 
 # Chạy ứng dụng
 vx.mainloop()
