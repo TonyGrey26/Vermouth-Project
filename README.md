@@ -1,5 +1,9 @@
 # ClamAV Usage
 
+```
+$ docker compose up -d
+```
+
 ```python
 from clamav_wrapper import ClamavWrapper
 
