@@ -1,0 +1,3 @@
+2025-01-20 23:03:22,689 - INFO - Scanned file: C:/Users/admin/OneDrive/Ta\u0300i liê\u0323u/KI\u1ec2M TRA.docx
+2025-01-20 23:03:22,689 - INFO - Hash: 1a2b331445f8827a93488206f8568821ff4d6931
+2025-01-20 23:03:22,689 - INFO - Result: File appears to be safe
