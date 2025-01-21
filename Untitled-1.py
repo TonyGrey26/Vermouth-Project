@@ -82,13 +82,10 @@ class FileScanner:
 
     def scan_file(self, filepath, progress_callback=None):
         try:
-            sha1 = hashlib.sha1()
+            # Get file size
             file_size = os.path.getsize(filepath)
-            with open(filepath, 'rb') as f:
-                while chunk := f.read(8192):
-                    sha1.update(chunk)
-            fhash = sha1.hexdigest()
 
+            # Identify file type based on the header
             with open(filepath, 'rb') as f:
                 header = f.read(8)
 
@@ -106,29 +103,37 @@ class FileScanner:
                     file_type = ftype
                     break
 
+            # Scan file with ClamAV
             try:
                 clamav = ClamavWrapper(host='localhost', port=3310)
                 clamav_result = clamav.scan_file(filepath)
             except ConnectionError as e:
                 clamav_result = f"ClamAV scan error: {str(e)}"
-
-            if fhash in self.malware_hashes:
-                is_malicious = True
-                message = f"WARNING: Malware detected - {self.malware_hashes[fhash]}"
-            else:
                 is_malicious = False
-                message = "File appears to be safe"
+                message = f"Unable to scan file: {clamav_result}"
+            else:
+                # Interpret ClamAV results
+                if "FOUND" in clamav_result:
+                    is_malicious = True
+                    message = f"WARNING: Malware detected! (ClamAV Result: {clamav_result.strip()})"
+                elif "OK" in clamav_result:
+                    is_malicious = False
+                    message = "File is safe (ClamAV result: OK)."
+                else:
+                    is_malicious = False
+                    message = f"Unknown ClamAV result: {clamav_result.strip()}"
 
+            # Prepare the result dictionary
             result = {
                 'file_type': file_type,
                 'file_size': file_size,
                 'is_malicious': is_malicious,
                 'message': message,
-                'clamav_result': clamav_result,
+                'clamav_result': clamav_result.strip(),
             }
 
+            # Log the scan result
             self.logger.info(f"Scanned file: {filepath}")
-            self.logger.info(f"Hash: {fhash}")
             self.logger.info(f"Result: {message}")
 
             return result
@@ -140,7 +145,7 @@ class FileScanner:
                 'message': f"Error scanning file: {str(e)}"
             }
 
-# Đoạn giao diện giữ nguyên
+
 
 
 # Khởi tạo scanner
@@ -297,7 +302,7 @@ b0 = Button(vx, text="Select File", font='Gothic 20 bold', bg='black', fg='white
 b1 = Button(vx, text="Start Checking", font='Gothic 20 bold', bg='black', fg='white', bd=5, command=sthread)
 b2 = Button(vx, text="Delete Quarantine", font='Gothic 20 bold', bg='black', fg='white', bd=5, command=delete_quarantined)
 b3 = Button(vx, text="Quarantine", font='Gothic 20 bold', bg='black', fg='white', bd=5, command=quarantine_current_file)
-b4 = Button(vx, text="Show Quarantine", font='Gothic 20 bold', bg='black', fg='white', bd=5, command=show_quarantine)
+# b4 = Button(vx, text="Show Quarantine", font='Gothic 20 bold', bg='black', fg='white', bd=5, command=show_quarantine)
 b5 = Button(vx, text="Exit", font='Gothic 20 bold', bg='black', fg='white', bd=5, command=exit)
 
 
@@ -307,7 +312,7 @@ canvas1.create_window(180, 50, anchor="nw", window=b0)  # Nút Select File
 canvas1.create_window(165, 130, anchor="nw", window=b1)  # Nút Start Checking
 canvas1.create_window(135, 210, anchor="nw", window=b2)  # Nút Delete Quarantine
 canvas1.create_window(190, 290, anchor="nw", window=b3)  # Nút Quarantine
-canvas1.create_window(160, 450, anchor="nw", window=b4) # nút show file quarantine
+# canvas1.create_window(160, 450, anchor="nw", window=b4) # nút show file quarantine
 canvas1.create_window(235, 370, anchor="nw", window=b5)  # Nút Exit
 
 # Chạy ứng dụng

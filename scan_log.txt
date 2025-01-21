@@ -18,3 +18,10 @@
 2025-01-21 17:51:08,532 - INFO - Scanned file: C:/Users/admin/OneDrive/Máy tính/tét.txt
 2025-01-21 17:51:08,532 - INFO - Hash: da39a3ee5e6b4b0d3255bfef95601890afd80709
 2025-01-21 17:51:08,532 - INFO - Result: File appears to be safe
+2025-01-21 18:04:24,755 - ERROR - Error scanning file C:/Users/admin/OneDrive/Máy tính/tét.txt: name 'is_malicious' is not defined
+2025-01-21 18:13:57,128 - INFO - Scanned file: C:/Users/admin/OneDrive/Máy tính/tét.txt
+2025-01-21 18:13:57,128 - INFO - Result: Unable to scan file: ClamAV scan error: Cannot connect to clamd. Is the clamd server running?
+2025-01-21 18:14:48,534 - INFO - Scanned file: C:/Users/admin/OneDrive/Máy tính/tét.txt
+2025-01-21 18:14:48,534 - INFO - Result: Unable to scan file: ClamAV scan error: Cannot connect to clamd. Is the clamd server running?
+2025-01-21 18:15:18,633 - INFO - Scanned file: C:/Users/admin/OneDrive/Máy tính/tét.txt
+2025-01-21 18:15:18,633 - INFO - Result: Unable to scan file: ClamAV scan error: Cannot connect to clamd. Is the clamd server running?
