@@ -7,3 +7,15 @@
 2025-01-21 14:06:28,817 - INFO - Deleted quarantined file: quarantine\New Text Document.txt
 2025-01-21 21:47:55,450 - INFO - Scanned file: C:/Users/Nghaiz/Downloads/DeathNote.exe
 2025-01-21 21:47:55,450 - INFO - Result: WARNING: Malware detected! (ClamAV Result: FOUND)
+2025-01-22 22:35:38,776 - INFO - Scanned file: C:/Users/admin/OneDrive/Máy tính/tét.txt
+2025-01-22 22:35:38,776 - INFO - Result: File is safe (ClamAV result: OK).
+2025-01-22 22:56:24,065 - INFO - Scanned file: C:/Users/admin/OneDrive/Máy tính/tét.txt
+2025-01-22 22:56:24,065 - INFO - Result: File is safe (ClamAV result: OK).
+2025-01-22 23:05:57,425 - INFO - Scanned file: C:/Users/admin/OneDrive/Máy tính/tét.txt
+2025-01-22 23:05:57,425 - INFO - Result: {'file_type': 'Unknown', 'file_size': 0, 'is_malicious': False, 'clamav_result': 'OK'}
+2025-01-22 23:07:05,890 - ERROR - Cancelling an overlapped future failed
+future: <_OverlappedFuture pending cb=[_ProactorReadPipeTransport._loop_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python312\Lib\asyncio\windows_events.py", line 72, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid

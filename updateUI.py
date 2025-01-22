@@ -2,15 +2,16 @@ import os
 import threading
 import time
 import shutil
+import logging
 from tkinter import *
 from tkinter import filedialog, messagebox
 from tkinter.ttk import Progressbar
 import ttkbootstrap as tb
 from clamav_wrapper import ClamavWrapper
 
-
 class FileScanner:
     def __init__(self):
+        self.setup_logging()
         self.quarantine_dir = "quarantine"
         self.malware_hashes = {
             "e1112134b6dcc8bed54e0e34d8ac272795e73d74": "Malware Sample 1",
@@ -18,6 +19,14 @@ class FileScanner:
         }
         if not os.path.exists(self.quarantine_dir):
             os.makedirs(self.quarantine_dir)
+
+    def setup_logging(self):
+        logging.basicConfig(
+            filename='scan_log.txt',
+            level=logging.INFO,
+            format='%(asctime)s - %(levelname)s - %(message)s'
+        )
+        self.logger = logging.getLogger('FileScanner')
 
     def scan_file(self, filepath):
         try:
@@ -34,28 +43,34 @@ class FileScanner:
             clamav_result = clamav.scan_file(filepath)
             is_malicious = "FOUND" in clamav_result
 
-            return {
+            result = {
                 "file_type": file_type,
                 "file_size": file_size,
                 "is_malicious": is_malicious,
                 "clamav_result": clamav_result.strip(),
             }
+            self.logger.info(f"Scanned file: {filepath}")
+            self.logger.info(f"Result: {result}")
+
+            return result
         except Exception as e:
+            self.logger.error(f"Error scanning file {filepath}: {str(e)}")
             return {"is_malicious": False, "clamav_result": str(e)}
 
     def quarantine_file(self, filepath):
         try:
             filename = os.path.basename(filepath)
-            shutil.move(filepath, os.path.join(self.quarantine_dir, filename))
+            quarantine_path = os.path.join(self.quarantine_dir, filename)
+            shutil.move(filepath, quarantine_path)
+            self.logger.info(f"File quarantined: {filepath} -> {quarantine_path}")
             return True
-        except Exception:
+        except Exception as e:
+            self.logger.error(f"Error quarantining file {filepath}: {str(e)}")
             return False
-
 
 scanner = FileScanner()
 last_scanned_file = None
 last_scan_result = None
-
 
 def select_file():
     global last_scanned_file
@@ -66,7 +81,6 @@ def select_file():
         file_label.config(text=f"Selected: {os.path.basename(last_scanned_file)}")
     else:
         file_label.config(text="No file selected.")
-
 
 def scan_file():
     global last_scan_result
@@ -94,7 +108,6 @@ def scan_file():
 
     threading.Thread(target=perform_scan).start()
 
-
 def quarantine_file():
     if not last_scan_result or not last_scan_result["is_malicious"]:
         messagebox.showwarning("Warning", "No malicious file to quarantine!")
@@ -104,41 +117,37 @@ def quarantine_file():
     else:
         messagebox.showerror("Error", "Failed to quarantine the file.")
 
-
 def delete_quarantined():
     try:
         for file in os.listdir(scanner.quarantine_dir):
-            os.remove(os.path.join(scanner.quarantine_dir, file))
+            file_path = os.path.join(scanner.quarantine_dir, file)
+            os.remove(file_path)
+            scanner.logger.info(f"Deleted quarantined file: {file_path}")
         messagebox.showinfo("Success", "All quarantined files have been deleted.")
-    except Exception:
+    except Exception as e:
+        scanner.logger.error(f"Error deleting quarantined files: {str(e)}")
         messagebox.showerror("Error", "Failed to delete quarantined files.")
-
 
 # Hover effect functions
 def on_enter(event):
-    event.widget.config(bootstyle="warning")  # Hover effect (change to yellow)
+    event.widget.config(bootstyle="warning")
 
 def on_leave(event):
-    event.widget.config(bootstyle="success")  # Revert back to green on hover out
+    event.widget.config(bootstyle="success")
 
+from PIL import Image, ImageTk
 
-from PIL import Image, ImageTk  # Thư viện xử lý ảnh
-
-# Thêm vào phần tạo cửa sổ
 vx = tb.Window(themename="superhero")
 vx.title("Vermouth Secure X")
-vx.geometry("1000x1200")  # Tăng kích thước cửa sổ
-# khóa kích thwuocs cửa sổ
+vx.geometry("1000x1200")
 vx.config(background='black')
 vx.resizable(False, False)
-# Thêm ảnh nền
-background_image = Image.open("./hinhnen.png")
-background_photo = ImageTk.PhotoImage(background_image)
 
+background_image = Image.open("./hinhnen3.png")
+background_photo = ImageTk.PhotoImage(background_image)
 background_label = Label(vx, image=background_photo)
 background_label.place(relx=0, rely=0, relwidth=1, relheight=1)
 
-# Tiếp tục với các widget khác
 title_label = tb.Label(vx, text="Vermouth Secure X", font=("Helvetica", 40), bootstyle="danger")
 title_label.pack(pady=50)
 
