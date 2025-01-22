@@ -2,6 +2,7 @@
 
 ```
 pip install vt-py
+pip install ttkbootstrap
 ```
 
 # Result
