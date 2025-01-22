@@ -28,11 +28,11 @@ class ClamavWrapper:
                         print(analysis.status)
                         if analysis.status == "completed":
                             break
-                        time.sleep(5)
+                        # time.sleep(5)
                     file = self.client.get_object(f"/files/{file_hash}")
                     result = file.last_analysis_stats
         
         print(result)
-        if result["malicious"] >= 8 or result["suspicious"] >= 10:
+        if result["malicious"] >= 4 or result["suspicious"] >= 6:
             return "FOUND"
         return "OK"
