@@ -143,7 +143,7 @@ vx.geometry("1000x1200")
 vx.config(background='black')
 vx.resizable(False, False)
 
-background_image = Image.open("./hinhnen3.png")
+background_image = Image.open("./hinhnen2.png")
 background_photo = ImageTk.PhotoImage(background_image)
 background_label = Label(vx, image=background_photo)
 background_label.place(relx=0, rely=0, relwidth=1, relheight=1)
